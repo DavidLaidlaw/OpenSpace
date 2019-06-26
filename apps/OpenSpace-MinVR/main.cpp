@@ -183,7 +183,6 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             }
 
             MouseAction action;
-            KeyModifier mods;
 
             if (actionName == "Down") {
                 action = MouseAction::Press;
@@ -202,6 +201,13 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             if (button == MouseButton::Right && action == MouseAction::Press) {
                 windowingGlobals.mouseButtons |= 1 << 2;
             }
+            
+            using KM = KeyModifier;
+            KM mods = KM::NoModifier;
+            mods |= keyboardState.modifierShift ? KM::Shift : KM::NoModifier;
+            mods |= keyboardState.modifierCtrl ? KM::Control : KM::NoModifier;
+            mods |= keyboardState.modifierAlt ? KM::Alt : KM::NoModifier;
+
             openspace::global::openSpaceEngine.mouseButtonCallback(button, action, mods);
         }
 
@@ -342,6 +348,14 @@ int main(int argc, char** argv) {
     }
 
     ghoul::initialize();
+
+    // Register the path of the executable,
+    // to make it possible to find other files in the same directory.
+    FileSys.registerPathToken(
+        "${BIN}",
+        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        ghoul::filesystem::FileSystem::Override::Yes
+    );
 
     // Create the OpenSpace engine and get arguments for the SGCT engine
     std::string windowConfiguration;

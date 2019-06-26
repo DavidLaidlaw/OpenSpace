@@ -58,7 +58,7 @@ target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ex
 # MAJOR DEPENDENCY ON OPENSPACE
 # Add dependency on main OpenSpace library
 target_include_directories(OpenSpace-MinVR PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
-target_link_libraries(OpenSpace-MinVR openspace-core)
+target_link_libraries(OpenSpace-MinVR openspace-core MinVR)
 #target_link_libraries(OpenSpace-MinVR libOpenSpace)
 
 # Additional depends needed for OpenSpace
@@ -68,6 +68,7 @@ target_include_directories(OpenSpace-MinVR PUBLIC ${GHOUL_ROOT_DIR}/include)
 # GLM
 # begin_dependency("GLM")
 set(GLM_ROOT_DIR "${GHOUL_ROOT_DIR}/ext/glm")
+set(GLM_DIR "${GHOUL_ROOT_DIR}/ext/glm")
 find_package(GLM REQUIRED)
 message(STATUS "Including GLM found at ${GLM_INCLUDE_DIRS}")
 mark_as_advanced(GLM_INCLUDE_DIR GLM_INCLUDE_DIRS)
