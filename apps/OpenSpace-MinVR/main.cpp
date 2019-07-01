@@ -331,6 +331,10 @@ void setupMinVrDelegateFunctions(VRMain& main) {
 }
 
 int main(int argc, char** argv) {
+
+
+
+
     // Initialize the LogManager and add the console log as this will be used every time
     // and we need a fall back if something goes wrong between here and when we add the
     // logs from the configuration file. If the user requested as specific loglevel in the
@@ -417,15 +421,19 @@ int main(int argc, char** argv) {
     }
 
     openspace::global::openSpaceEngine.registerPathTokens();
+    LDEBUG("Before openspaceengine::initialize()");
     openspace::global::openSpaceEngine.initialize();
+    LDEBUG("After openspaceengine::initialize()");
 
+
+    // Create the MinVR engine (VRMain)
     engine.addEventHandler(&handler);
     engine.addRenderHandler(&handler);
-    engine.loadConfig(global::configuration.windowConfiguration);
     // Yes, this still contains the OpenSpace-specific commandline arguments, but no one
     // will ever know if we use the remaining arguments or not; both commandline parsers
     // just ignore the arguments they don't understand
     engine.initialize(argc, argv);
+
 
     setupMinVrDelegateFunctions(engine);
 
@@ -435,10 +443,13 @@ int main(int argc, char** argv) {
     if (global::windowDelegate.isMaster()) {
         engine.addInputDevice(&handler);
     }
+    
 
     lastFrameTime = std::chrono::high_resolution_clock::now();
     // run loop-di-loop
     do {
+        //LDEBUG("In loop");
+
         if (HasInitializedGL) {
             auto now = std::chrono::high_resolution_clock::now();
             std::chrono::nanoseconds dt = now - lastFrameTime;
@@ -483,18 +494,23 @@ int main(int argc, char** argv) {
                 e.addData("SynchronizationData", intData);
                 eventQueue.push(e);
             }
+        }
 
-            engine.synchronizeAndProcessEvents();
+        //LDEBUG("Before MinVR::VRMain::synchronizeAndProcessEvents()");
+        engine.synchronizeAndProcessEvents();
+        //LDEBUG("After MinVR::VRMain::synchronizeAndProcessEvents()");
 
-            engine.updateAllModels();
+        engine.updateAllModels();
 
+        if (HasInitializedGL) {
             // @TODO(abock): Not sure if this should be before updateAllModels or here
             openspace::global::openSpaceEngine.postSynchronizationPreDraw();
-
             ++FrameNumber;
         }
 
+        //LDEBUG("Before MinVR::VRMain::renderOnAllDisplays()");
         engine.renderOnAllDisplays();
+        //LDEBUG("After MinVR::VRMain::renderOnAllDisplays()");
     } while (!engine.getShutdown());
 
     openspace::global::openSpaceEngine.deinitializeGL();
